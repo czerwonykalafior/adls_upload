@@ -3,7 +3,7 @@ import os
 from azure.storage.filedatalake import DataLakeServiceClient
 
 
-def upload_to_adls(directory, filename):
+def upload_to_adls(directory, filename, file_chunk_size=1048576):
     service_client = DataLakeServiceClient.from_connection_string(os.environ['ADLS_CONNECTION_STRING'])
     file_system_client = service_client.get_file_system_client(file_system=os.environ['ADLS_FILE_SYSTEM_NAME'])
     directory_client = file_system_client.get_directory_client(directory)
@@ -12,7 +12,7 @@ def upload_to_adls(directory, filename):
     with open(filename, 'rb') as local_file:
         offset = 0
 
-        for file_chunk in iter(lambda: local_file.read(4096), b""):
+        for file_chunk in iter(lambda: local_file.read(file_chunk_size), b""):
             chunk_size = len(file_chunk)
             file_client.append_data(
                 file_chunk,
