@@ -10,14 +10,17 @@ def upload_to_adls(directory, filename):
     file_client = directory_client.create_file(filename)
 
     with open(filename, 'rb') as local_file:
-        offset, current_size = 0, 0
+        offset = 0
 
         for file_chunk in iter(lambda: local_file.read(4096), b""):
             chunk_size = len(file_chunk)
-            current_size += chunk_size
-            file_client.append_data(file_chunk, offset=offset, length=chunk_size, validate_content=True)
-            file_client.flush_data(current_size)
-            offset += len(file_chunk)
+            file_client.append_data(
+                file_chunk,
+                offset=offset,
+                length=chunk_size,
+                validate_content=True)
+            offset += chunk_size
+            file_client.flush_data(offset)
 
 
 upload_to_adls("my-directory", "data.csv")
